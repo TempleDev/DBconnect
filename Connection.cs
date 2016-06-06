@@ -23,8 +23,8 @@ namespace URP
 
         public DataSet GetDataSet(String SqlSelect)
         {
-            // Input parameter is a SELECT SQL statement. Return is the Dataset 
-            // Note: The Dataset is also stored as a class variable for use 
+            // Input parameter is a SELECT SQL statement. Return is the Dataset
+            // Note: The Dataset is also stored as a class variable for use
             // in the GetField function
             SqlDataAdapter myDataAdapter = new SqlDataAdapter(SqlSelect, myConnectionSql);
             DataSet myDataSet = new DataSet();
@@ -35,7 +35,7 @@ namespace URP
 
         public DataSet GetDataSet(String SqlSelect, out int theRecordCount)
         {
-            // Input parameter is a SELECT SQL statement. 
+            // Input parameter is a SELECT SQL statement.
             // Output parameter is the number of rows in the returned dataset.
             // Return is a Dataset
             SqlDataAdapter myDataAdapter = new SqlDataAdapter(SqlSelect, myConnectionSql);
@@ -48,7 +48,7 @@ namespace URP
 
         public DataSet GetDataSet(String SqlSelect, out int theRecordCount, out String theErrorMessage)
         {
-            // Input parameter is a SELECT SQL statement. 
+            // Input parameter is a SELECT SQL statement.
             // Output parameter (1) is the number of rows in the returned dataset.
             // Output parameter (2) is the error message when an exception occurs.
             // Return is a Dataset
@@ -73,7 +73,7 @@ namespace URP
 
         //public SqlDataReader GetDataReader(String SqlSelect)
         //{
-        //    // Input parameter is a SELECT SQL statement. 
+        //    // Input parameter is a SELECT SQL statement.
         //    objCmd = new SqlCommand(SqlSelect, myConnectionSql);
         //    return objCmd.ExecuteReader();
         //}
@@ -81,7 +81,7 @@ namespace URP
 
         public int DoUpdate(String SqlManipulate)
         {
-            // Input parameter is a SQL manipulate statement (INSERT, UPDATE, DELETE). 
+            // Input parameter is a SQL manipulate statement (INSERT, UPDATE, DELETE).
             // Returns the number of rows affected by the update.
             // Returns -1 when an exsception occurs.
             objCmd = new SqlCommand(SqlManipulate, myConnectionSql);
@@ -98,9 +98,31 @@ namespace URP
             }
         }
 
+        public void DoUpdateWithDSCmdOjb(Dataset passeddataset, string DBTableDestination)
+        {
+          // Parameters in are the dataset being passed and the table you are inserting into.
+          // The dataset MUST have the SAME COLUMN NAMES as the SQL table to which it is being inserted into.
+
+          try
+          {
+            using (SqlBulkCopy bulkCopy = new SqlBulkCopy(myConnectionSql))
+            {
+              bulkCopy.DestinationTableName = DBTableDestination;
+
+              bulkCopy.WriteToServer(passed.Tables[0]);
+
+              myConnectionSql.Close();
+            }
+          }
+          catch (Exception ex)
+          {
+            myConnectionSql.Close();
+          }
+        }
+
         public int DoUpdateUsingCmdObj(SqlCommand theCommandObject)
         {
-            // Input parameter is a Command object containing a SQL manipulate statement (Insert, Update, Delete). 
+            // Input parameter is a Command object containing a SQL manipulate statement (Insert, Update, Delete).
             // Returns the number of rows affected by the update.
             // Returns -1 when an exsception occurs.
             // This method is used for passing parameters to a Stored Procedure
@@ -128,7 +150,7 @@ namespace URP
             ds = myDataSet;
 
             return myDataSet;
-            
+
         }
 
         public DataRow GetRow(DataSet theDataSet, int theRow)
@@ -140,7 +162,7 @@ namespace URP
 
         public Array GetRows(String theCondition)
         {
-            // Input parameters are (1) a DataSet and (2) the zero based row of the 
+            // Input parameters are (1) a DataSet and (2) the zero based row of the
             // table in the DataSet to be returned.  Returns a row.
             DataRow[] objRow;
             DataTable objTable = ds.Tables[0];
@@ -151,8 +173,8 @@ namespace URP
         public Object GetField(String theFieldName, int theRow)
         {
             // Input parameterss are (1) a Field (Column) name as a string and
-            // (2) the zero based row of the table in the DataSet 
-            // from which the field is to be extracted. Returns the value 
+            // (2) the zero based row of the table in the DataSet
+            // from which the field is to be extracted. Returns the value
             // in the field as a variant type.
             // This function assumes that one of the getDataSet functions
             // had been called, thus producing a ds at the class level.
@@ -165,15 +187,15 @@ namespace URP
         {
             // Input parameter is a DataSet. This function is used to Commit
             // the Dataset to the Data Source when updating a disconnected ds.
-            
+
             SqlDataAdapter myDataAdapter = new SqlDataAdapter();
             myDataAdapter.Update(theDataSet);
         }
 
         public Object ExecuteScalarFunction(SqlCommand theCommand)
         {
-            // Input parameter is a Command object containing a Select statement 
-            // that returns a single scalar value. Returns the single scalar value.  
+            // Input parameter is a Command object containing a Select statement
+            // that returns a single scalar value. Returns the single scalar value.
             // Returns  scalar value as a Variant Type.
             theCommand.Connection = myConnectionSql;
             return theCommand.ExecuteScalar();
@@ -181,8 +203,8 @@ namespace URP
 
         public SqlConnection GetConnection()
         {
-            // NOTE: .NET has implemented its Stored User Defined Functions only 
-            // with the Managed Provider for SQL Server, 
+            // NOTE: .NET has implemented its Stored User Defined Functions only
+            // with the Managed Provider for SQL Server,
             // not the OLEDB provider.
             return myConnectionSql;
         }
