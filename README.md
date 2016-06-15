@@ -2,7 +2,7 @@
 
 Temple University IS&amp;T Capstone Database Connection Library
 <br/>
-Contact the Author @[you.do.good.work@temple.edu](http://tumail.temple.edu)</br/>
+Contact the Author @[chorizo.burrito@temple.edu](http://tumail.temple.edu)</br/>
 
 **OVERVIEW**
 This Library is just one class. It fixes the issues with the previous Connection class as well adds some more functionality. You are free to use it and modify it as needed.  
@@ -31,4 +31,4 @@ The downsides to this method is that it does not handle duplicates. It will just
 ```
 the first and last record (["1", "Chips", "10"]) will be added twice.
 
-I would suggest using this method to initially populate your data. 
+I would suggest using this method to initially populate your data.
