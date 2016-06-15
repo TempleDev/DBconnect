@@ -9,7 +9,7 @@ This Library is just one class. It fixes the issues with the previous Connection
 
 ## Content
 [Methods](#methods)<br/>
-[User-Defined Table Parameters](#user-defined-table-parameters)
+[User-Defined Table Parameters](#user-defined-table-parameters)<br/>
 [SQL Merge Function](#sql-merge-function)
 
 ###Methods
