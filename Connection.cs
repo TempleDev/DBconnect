@@ -98,7 +98,7 @@ namespace URP
             }
         }
 
-        public void DoUpdateWithDSCmdOjb(Dataset passeddataset, string DBTableDestination)
+        public void DoUpdateWithDSCmdOjb(Dataset passedds, string DBTableDestination)
         {
           // Parameters in are the dataset being passed and the table you are inserting into.
           // The dataset MUST have the SAME COLUMN NAMES as the SQL table to which it is being inserted into.
@@ -109,7 +109,7 @@ namespace URP
             {
               bulkCopy.DestinationTableName = DBTableDestination;
 
-              bulkCopy.WriteToServer(passed.Tables[0]);
+              bulkCopy.WriteToServer(passedds.Tables[0]);
 
               myConnectionSql.Close();
             }
