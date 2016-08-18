@@ -11,7 +11,7 @@ This Library is just one class. It fixes the issues with the previous Connection
 [Methods](#methods)<br/>
 [User-Defined Table Parameters](#user-defined-table-parameters)<br/>
 [SQL Merge Function](#sql-merge-function)<br/>
-[Search Stored Procedure]<br/>
+[Search Stored Procedure](#search-stored-procedure)<br/>
 
 ###Methods
 ####Notes:
@@ -43,9 +43,60 @@ When in your database in either Visual Studio 2012/2015 or Microsoft SQL Server 
 ```sql
 CREATE TYPE [dbo].[ExampleOfUserDefinedTable] AS TABLE
 (
+	id (INT) NOT NULL,
 	first_name VARCHAR(50) NOT NULL,
 	last_name VARCHAR(50) NOT NULL,
 	departmentID (INT) NOT NULL
 )
 ```
 The **NOT NULL** isn't required but it is a good practice to put them.
+
+When using a User-Defined Table in a stored procedure all you will need to do is create the table within C#. You can attach the C# table to a **SqlCommand** object no problem. Example of this:
+```csharp
+	DataTable t = new DataTable();
+	t.Columns.Add("id")
+	t.Columns.Add("first_name");
+	t.Columns.Add("last_name"); 
+	t.Columns.Add("departmentID");
+```
+The column names are the same as the user-defined-table that was created in the previous section. Doing so make it a lot easier following how the code works. Once the table is full of data you can add it as a parameter to a stored procedure.
+```csharp
+	public static void MergeExample(DataTable t)
+	{
+		DBConnect myDB =  new DBConnect();
+		SqlCommand objEx = new SqlCommand();
+		objEx.CommandType = CommandType.StoreProcedure;
+		ojbEx.CommandText = "MergeExampleSP";
+		objEx.Parameters.AddWithValue("@tableType", t); 
+		myDB.DoUpdateWithDSCmdOjb(objEx);
+		myDB.CloseConnection();
+	}
+```
+**FOR THE LOVE OF GOD CLOSE ALL YOUR DATABASE CONNECTIONS!**
+
+###SQL Merge Function
+####Notes:
+SQL Merge is a really powerful function. It can take data merge it into a table either by doing **INSERT** or doing an **UPDATE**. 
+
+Now this is the example of the what a stored procedure will look like. Look at the SQL code first before reading the explanation. 
+```sql
+	ALTER PROCEDURE [dbo].[MergeExampleSP]
+	(
+		@tableType ExampleOfUserDefinedTable READONLY --The READONLY is required so the database knows it isn't doing anything except reading the table.
+	)
+	AS
+	BEGIN
+		MERGE INTO dbo.Faculty AS m1 --m1 an alias for Faculty
+		USING @tblAccessRequests AS m2 --m2 is alias for the parameter
+		ON m1.id = m2.id --id is the primary key for Faculty
+		WHEN MATCHED THEN --If primary key matches between both tables UPDATE fires
+		UPDATE SET m1.first_name = m2.first_name,
+			m1.last_name = m2.last_name,
+			m1.creation_date = GETDATE(),
+			m1.last_modified = GETDATE()
+		WHEN NOT MATCHED BY TARGET THEN --If primary key does not match INSERT fires
+		INSERT (id, first_name, last_name, creation_date, last_modified)
+		VALUES (m2.id, m2.first_name, m2.last_name, GETDATE(), GETDATE()); --The ; ends the function
+	END
+```
+After **MERGE INTO** is the table within the database where the data is being merge into. The **dbo.** stands for **DATABASE OWNER**. It is required to make the **MERGE** function work. 
