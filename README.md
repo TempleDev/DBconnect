@@ -8,10 +8,33 @@ Contact the Author @[chorizo.burrito@temple.edu](http://tumail.temple.edu)</br/>
 This Library is just one class. It fixes the issues with the previous Connection class as well adds some more functionality. You are free to use it and modify it as needed.  
 
 ## Content
+[Unique Constraint](#unique-constraint)<br/>
 [Methods](#methods)<br/>
 [User-Defined Table Parameters](#user-defined-table-parameters)<br/>
 [SQL Merge Function](#sql-merge-function)<br/>
 [Search Stored Procedure](#search-stored-procedure)<br/>
+
+###Unique Constraint
+####Notes:
+A Unique Constraint is similar to a primary key. The difference between the two is that a Unique Constraint is a unique identifier made up of two or more fields. 
+
+####Example:
+Set up a unquie constraint with a script:
+```sql
+	CONSTRAINT [UC_NameOfConstraint] UNIQUE NONCLUSTERED ([college] ASC, [term] ASC)
+```
+This can be put at the bottom of your table script within the **T-SQL** tab in in **Design** view. Or you can right click **Keys** on the right side in the designer view and **Add New** > **Unique Key**.
+```sql
+	["CST", "Fall 2016"]
+	["CST", "Fall 2015"]
+	["ED", "Fall 2016"]
+	["ED", "Fall 2015"]
+```
+These records are all different. If you try to insert 
+```sql
+	["CST", "Fall 2016"]
+```
+you will get an error.
 
 ###Methods
 ####Notes:
@@ -82,12 +105,13 @@ Now this is the example of the what a stored procedure will look like. Look at t
 ```sql
 	ALTER PROCEDURE [dbo].[MergeExampleSP]
 	(
-		@tableType ExampleOfUserDefinedTable READONLY --The READONLY is required so the database knows it isn't doing anything except reading the table.
+		@tableType ExampleOfUserDefinedTable READONLY 
+		--The READONLY is required so the database knows it isn't doing anything except reading the table.
 	)
 	AS
 	BEGIN
-		MERGE INTO dbo.Faculty AS m1 --m1 an alias for Faculty
-		USING @tblAccessRequests AS m2 --m2 is alias for the parameter
+		MERGE INTO dbo.Faculty AS m1 --m1 an alias for Faculty, this is the Target Table
+		USING @tblAccessRequests AS m2 --m2 is alias for the parameter, this is the Source Table
 		ON m1.id = m2.id --id is the primary key for Faculty
 		WHEN MATCHED THEN --If primary key matches between both tables UPDATE fires
 		UPDATE SET m1.first_name = m2.first_name,
@@ -99,4 +123,6 @@ Now this is the example of the what a stored procedure will look like. Look at t
 		VALUES (m2.id, m2.first_name, m2.last_name, GETDATE(), GETDATE()); --The ; ends the function
 	END
 ```
-After **MERGE INTO** is the table within the database where the data is being merge into. The **dbo.** stands for **DATABASE OWNER**. It is required to make the **MERGE** function work. 
+After **MERGE INTO** is the table within the database where the data is being merge into. The **dbo.** stands for **DATABASE OWNER**. It is required to make the **MERGE** function work. **USING** is telling the function what table is being used. The columns headers that were created in the **User-Defined Table** from the **DataTable** in C# are the same in SQL. The keyword **ON** is setting the primary key or unique constraint on which to use to identify a record within the table. If there is a match between that constraint between the target table and source table **UPDATE** will fire. This **UPDATE** takes the records from the source table and sets the target tables records to those values based on the constraint matched. The last two records set **creation_date** and **last_modified** are set by the systems current date. You could also set these values with whatever you want. 
+
+If the constraint between the target table and source table is not the same then the **INSERT** is fired. **WHEN NOT MATCHED BY TARGET THEN** means just that. If there is a record within the source table that is not within the target table it will now be inserted into the target table. Changing **WHEN NOT MATCHED BY TARGET THEN** is changed to **WHEN NOT MATCHED BY SOURCE** this will be changing something within the target table. If the code about was changed like that it would update all records that matched between the target table and the source table, insert any records present within the source table but not the target table, all records within the target table that are not present within the source table will be deleted. Syntax is important.
