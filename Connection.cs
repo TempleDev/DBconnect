@@ -98,7 +98,7 @@ namespace TempleDev
             }
         }
 
-        public void DoUpdateWithDSCmdOjb(Dataset passedds, string DBTableDestination)
+        public void DoUpdateWithDSCmdOjb(DataSet passedds, string DBTableDestination)
         {
           // Parameters in are the dataset being passed and the table you are inserting into.
           // The dataset MUST have the SAME COLUMN NAMES as the SQL table to which it is being inserted into.
